@@ -1,0 +1,45 @@
+version: "3"
+services:
+  guap:
+    image: docker.kidev.ru/schedapp/suai:latest
+    restart: on-failure
+    environment:
+      - SPRING_APPLICATION_NAME=guap
+      - WAIT_HOSTS=mysql:3307
+      - WAIT_HOSTS_TIMEOUT=500
+      - WAIT_SLEEP_INTERVAL=30
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+    networks:
+      - eureka_network
+      - common_network
+      - redis_link
+    depends_on:
+      - redis
+    ports:
+      - "8070:8070"
+  redis:
+    image: "redis:alpine"
+    command: redis-server --requirepass aw4cha3vaith
+
+    volumes:
+      - "redis-data:/var/lib/redis"
+      - "redis-conf:/usr/local/etc/redis/redis.conf"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    networks:
+      - redis_link
+    ports:
+      - "6379:6379"
+
+volumes:
+  redis-data:
+  redis-conf:
+
+networks:
+  redis_link:
+  common_network:
+    name: common_network
+    external: true
+  eureka_network:
+    name: eureka_network
+    external: true
