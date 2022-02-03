@@ -1,11 +1,11 @@
 version: "3"
 services:
-  guap:
-    image: docker.kidev.ru/schedapp/suai:latest
+  spbstu:
+    image: spbstu:latest
     restart: on-failure
     environment:
-      - SPRING_APPLICATION_NAME=guap
-      - WAIT_HOSTS=mysql:3307
+      - SPRING_APPLICATION_NAME=spbstu
+      - WAIT_HOSTS=mysql:3306
       - WAIT_HOSTS_TIMEOUT=500
       - WAIT_SLEEP_INTERVAL=30
       - WAIT_HOST_CONNECT_TIMEOUT=30
@@ -16,7 +16,7 @@ services:
     depends_on:
       - redis
     ports:
-      - "8070:8070"
+      - "8071:8071"
   redis:
     image: "redis:alpine"
     command: redis-server --requirepass aw4cha3vaith
