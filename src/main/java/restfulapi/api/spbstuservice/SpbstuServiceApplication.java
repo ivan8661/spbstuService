@@ -42,6 +42,7 @@ public class SpbstuServiceApplication {
             return (args) -> {
                 logger.info("ЗАПУСК СИСТЕМЫ!");
                 importService.importTeachers();
+                importService.importGroups();
 
     };
 }

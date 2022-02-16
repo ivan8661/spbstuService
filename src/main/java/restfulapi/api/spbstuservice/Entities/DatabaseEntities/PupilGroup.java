@@ -5,9 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.codec.digest.DigestUtils;
+import restfulapi.api.spbstuservice.Services.importLessons.Entities.Groups;
+
+import java.util.Set;
 
 @Getter
 @Setter
@@ -30,9 +35,24 @@ public class PupilGroup {
     private String spec;
     @Column
     private String year;
+    @Column
+    private Integer universityGroupId;
+
+
+    @ManyToMany
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Set<Lesson> lessons;
+
+
 
 
     public PupilGroup() {
 
+    }
+
+    public PupilGroup(Groups.Group group) {
+        id = DigestUtils.sha256Hex("spbstu_group" + group.getId());
+        name = group.getName();
+        universityGroupId = group.getId();
     }
 }

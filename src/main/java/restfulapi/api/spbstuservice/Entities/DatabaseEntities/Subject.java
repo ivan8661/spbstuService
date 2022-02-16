@@ -30,6 +30,8 @@ public class Subject {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<Lesson> lessons;
 
+
+
     public Subject() {
     }
 }
