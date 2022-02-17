@@ -28,6 +28,15 @@ public class Groups {
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
+    @Override
+    public String toString() {
+        return "Groups{" +
+                "groups=" + groups +
+                ", faculty=" + faculty +
+                ", additionalProperties=" + additionalProperties +
+                '}';
+    }
+
     @JsonProperty("groups")
     public List<Group> getGroups() {
         return groups;
@@ -59,6 +68,20 @@ public class Groups {
     }
 
     public static class Group {
+
+        @Override
+        public String toString() {
+            return "Group{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    ", level=" + level +
+                    ", type='" + type + '\'' +
+                    ", kind=" + kind +
+                    ", spec='" + spec + '\'' +
+                    ", year=" + year +
+                    ", additionalProperties=" + additionalProperties +
+                    '}';
+        }
 
         @JsonProperty("id")
         private Integer id;
@@ -157,6 +180,15 @@ public class Groups {
             this.additionalProperties.put(name, value);
         }
 
+    }
+
+    public Groups(List<Group> groups, Faculty faculty, Map<String, Object> additionalProperties) {
+        this.groups = groups;
+        this.faculty = faculty;
+        this.additionalProperties = additionalProperties;
+    }
+
+    public Groups() {
     }
 
     public static class Faculty {

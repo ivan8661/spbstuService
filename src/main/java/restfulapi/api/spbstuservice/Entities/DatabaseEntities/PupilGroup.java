@@ -55,4 +55,19 @@ public class PupilGroup {
         name = group.getName();
         universityGroupId = group.getId();
     }
+
+    @Override
+    public String toString() {
+        return "PupilGroup{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", level='" + level + '\'' +
+                ", type='" + type + '\'' +
+                ", kind='" + kind + '\'' +
+                ", spec='" + spec + '\'' +
+                ", year='" + year + '\'' +
+                ", universityGroupId=" + universityGroupId +
+                ", lessons=" + lessons +
+                '}';
+    }
 }

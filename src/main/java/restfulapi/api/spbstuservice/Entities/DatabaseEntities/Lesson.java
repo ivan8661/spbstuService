@@ -7,10 +7,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.data.util.Pair;
-import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons;
+import restfulapi.api.spbstuservice.Services.importLessons.Entities.Groups;
+import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.Auditory;
+import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.LessonSpbstu;
+import restfulapi.api.spbstuservice.Services.importLessons.Entities.Teachers;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -51,22 +56,33 @@ public class Lesson {
     private Set<PupilGroup> groups;
 
 
+    @Transient
+    private ArrayList<Integer> groupUniversityIds = new ArrayList<>();
+    @Transient
+    private String subjectId;
+    @Transient
+    private ArrayList<Integer> teacherUniversityIds = new ArrayList<>();
+
+
+
     public Lesson() {
 
     }
 
-    public Lesson(Lessons.Day.Lesson lesson) {
-        id = DigestUtils.sha256Hex("spbstu_lesson" + lesson.getTimeStart() +
-                lesson.getSubject() + lesson.getTeachers().get(0).getId() + lesson.getAuditories().get(0).getId());
-        startTime = lesson.getTimeStart();
-        endTime = lesson.getTimeEnd();
+    public Lesson(LessonSpbstu lessonSpbstu) {
+        id = DigestUtils.sha256Hex("spbstu_lesson" + lessonSpbstu.getTimeStart() + getAuditory(lessonSpbstu.getAuditories().get(0)) +
+                lessonSpbstu.getSubject() + getTeacher(lessonSpbstu.getTeachers()) + lessonSpbstu.getAuditories().get(0).getId() + lessonSpbstu.getTypeObj().getId());
+        name = lessonSpbstu.getSubject();
+        startTime = lessonSpbstu.getTimeStart();
+        endTime = lessonSpbstu.getTimeEnd();
         lessonNum = createLessonNum(startTime);
-        rooms = "ауд. " + lesson.getAuditories().get(0).getName() + "адрес: " + lesson.getAuditories().get(0).getBuilding().getAddress();
-        type = lesson.getTypeObj().getName();
-
-
+        rooms = setAdress(lessonSpbstu.getAuditories().get(0));
+        type = lessonSpbstu.getTypeObj().getName();
+        groupUniversityIds.addAll(lessonSpbstu.getGroups().stream().map(Groups.Group::getId).collect(Collectors.toList()));
+        subjectId = DigestUtils.sha256Hex("spbstu" + lessonSpbstu.getSubject());
+        if(lessonSpbstu.getTeachers() != null)
+            teacherUniversityIds.addAll(lessonSpbstu.getTeachers().stream().map(Teachers.Teacher::getId).collect(Collectors.toList()));
     }
-
 
     private String createLessonNum(String startTime){
         switch (startTime) {
@@ -92,8 +108,35 @@ public class Lesson {
             case "18:00" -> {
                 return "6";
             }
+            case "19:45" -> {
+                return "7";
+            }
         }
 
             return "-";
         }
+
+    private String getTeacher(List<Teachers.Teacher> teachers) {
+        if(teachers!=null)
+            return teachers.get(0).getFullName();
+        return " ";
+    }
+
+    private String getAuditory(Auditory auditory) {
+        if(auditory !=null)
+            return auditory.getName();
+        return " ";
+    }
+
+    private String setAdress(Auditory auditory) {
+        String room = "";
+        if(!auditory.getName().isEmpty()){
+            room += "ауд. " + auditory.getName();
+        }
+        if(!auditory.getBuilding().getAbbr().isEmpty()){
+            room += ", " + auditory.getBuilding().getAbbr();
+        }
+
+        return room;
+    }
     }

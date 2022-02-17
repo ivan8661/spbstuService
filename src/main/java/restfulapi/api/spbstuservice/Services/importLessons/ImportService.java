@@ -7,23 +7,21 @@ import org.springframework.web.client.RestTemplate;
 import restfulapi.api.spbstuservice.Entities.DatabaseEntities.Lesson;
 import restfulapi.api.spbstuservice.Entities.DatabaseEntities.Professor;
 import restfulapi.api.spbstuservice.Entities.DatabaseEntities.PupilGroup;
-import restfulapi.api.spbstuservice.Exceptions.UserException;
-import restfulapi.api.spbstuservice.Exceptions.UserExceptionType;
-import restfulapi.api.spbstuservice.Repositories.BuildingRepository;
-import restfulapi.api.spbstuservice.Repositories.LessonRepository;
-import restfulapi.api.spbstuservice.Repositories.ProfessorRepository;
-import restfulapi.api.spbstuservice.Repositories.PupilGroupRepository;
+import restfulapi.api.spbstuservice.Entities.DatabaseEntities.Subject;
+import restfulapi.api.spbstuservice.Repositories.*;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Faculties;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Groups;
-import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons;
+import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.Day;
+import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.LessonSpbstu;
+import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.Lessons;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Teachers;
 import restfulapi.api.spbstuservice.SpbstuServiceApplication;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,22 +32,24 @@ public class ImportService {
     public final BuildingRepository buildingRepository;
     private final PupilGroupRepository pupilGroupRepository;
     private final LessonRepository lessonRepository;
+    private final SubjectRepository subjectRepository;
 
     @Autowired
     public ImportService(ProfessorRepository professorRepository,
                          BuildingRepository buildingRepository,
-                         PupilGroupRepository pupilGroupRepository, LessonRepository lessonRepository) {
+                         PupilGroupRepository pupilGroupRepository, LessonRepository lessonRepository, SubjectRepository subjectRepository) {
         this.professorRepository = professorRepository;
         this.buildingRepository = buildingRepository;
         this.pupilGroupRepository = pupilGroupRepository;
         this.lessonRepository = lessonRepository;
+        this.subjectRepository = subjectRepository;
     }
 
 
-    public void importTeachers() throws UserException {
+    public void importTeachers() {
         Teachers teachers = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/teachers", Teachers.class);
-        if (teachers == null || teachers.getTeachers().isEmpty())
-            throw new UserException(UserExceptionType.SERVER_ERROR, "teachers in import are missing!");
+        if (teachers == null || teachers.getTeachers() == null || teachers.getTeachers().isEmpty())
+            return;
         List<Professor> professors = teachers
                 .getTeachers()
                 .stream()
@@ -58,66 +58,61 @@ public class ImportService {
         professorRepository.saveAll(professors);
     }
 
-    public void importGroups() throws UserException {
+    public void importGroups() {
         Faculties faculties = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/faculties", Faculties.class);
-        if (faculties == null || faculties.getFaculties().isEmpty())
-            throw new UserException(UserExceptionType.SERVER_ERROR, "faculties in import are missing!");
+        if (faculties == null || faculties.getFaculties() == null || faculties.getFaculties().isEmpty())
+            return;
         for (int facultyId : faculties.getFaculties().stream().map(Faculties.Faculty::getId).collect(Collectors.toList())) {
             new Thread(() -> {
-                try {
-                    importThreadGroups(facultyId);
-                } catch (UserException e) {
-                    SpbstuServiceApplication.logger.error(e.getMessage());
-                }
+                importThreadGroups(facultyId);
             }).start();
         }
     }
 
 
-    private void importThreadGroups(int facultyId) throws UserException {
+    private void importThreadGroups(int facultyId) {
         Groups groups = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/faculties/"+ facultyId + "/groups", Groups.class);
         if(groups == null || groups.getGroups().isEmpty())
-            throw new UserException(UserExceptionType.SERVER_ERROR, "groups in import are missing!");
+            return;
         List<PupilGroup> pupilGroups = groups
                 .getGroups()
                 .stream()
                 .map(PupilGroup::new)
                 .collect(Collectors.toList());
         pupilGroupRepository.saveAll(pupilGroups);
-        for(String groupId : pupilGroups.stream().map(PupilGroup::getId).collect(Collectors.toList())){
+        ArrayList<Integer> groupIdList = (ArrayList<Integer>) pupilGroups.stream().map(PupilGroup::getUniversityGroupId).collect(Collectors.toList());
+        SpbstuServiceApplication.logger.info("вот список групп" + groupIdList);
+        for(Integer groupId : groupIdList){
             new Thread(() -> {
-                try {
-                    importThreadLessonFromGroup(groupId);
-                } catch (UserException e) {
-                    SpbstuServiceApplication.logger.error(e.getMessage());
-                }
+                importThreadLessonFromGroup(groupId);
             }).start();
         }
     }
 
 
-
-
-    private void importThreadLessonFromGroup(String groupId) throws UserException {
+    private void importThreadLessonFromGroup(Integer groupId) {
         Lessons lessonsBody = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/scheduler/"+ groupId, Lessons.class);
-        if(lessonsBody == null || lessonsBody.getDays() == null || lessonsBody.getDays().isEmpty())
-            throw new UserException(UserExceptionType.SERVER_ERROR, "lessons in import are missing!");
-        String nextWeek = importThreadLesson(lessonsBody);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        OffsetDateTime offsetDateTime = OffsetDateTime.parse(nextWeek);
-        offsetDateTime = offsetDateTime.plusDays(7);
+        SpbstuServiceApplication.logger.info("вот ответ по группе: " + lessonsBody.getDays());
+        if(lessonsBody.getDays() == null || lessonsBody.getDays().isEmpty())
+            return;
+        SpbstuServiceApplication.logger.info("вот список: " + lessonsBody.getDays());
+        String nextWeek = importThreadLesson(lessonsBody, groupId);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[yyyy-MM-dd]");
+        LocalDate dt = LocalDate.parse(nextWeek, formatter);
+        dt = dt.plusDays(7);
+        SpbstuServiceApplication.logger.info("вот:" + dt);
         lessonsBody = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/scheduler/"+
-                groupId +"?date="+offsetDateTime.format(formatter), Lessons.class);
+                groupId +"?date="+dt, Lessons.class);
         if(lessonsBody == null || lessonsBody.getDays().isEmpty())
-            throw new UserException(UserExceptionType.SERVER_ERROR, "lessons in import are missing!");
-        importThreadLesson(lessonsBody);
+            return;
+        importThreadLesson(lessonsBody, groupId);
     }
 
 
 
 
-    private String importThreadLesson(Lessons body){
-        for(Lessons.Day day : body.getDays()){
+    private String importThreadLesson(Lessons body, Integer groupId){
+        for(Day day : body.getDays()){
             String weekDay = getDayInText(day.getWeekday());
             boolean isOdd = body.getWeek().getIsOdd();
             List<Lesson> lessonsList = day.getLessons()
@@ -133,8 +128,23 @@ public class ImportService {
                             s.setId(s.getId()+"e"); //even
                         }
                     })
+                    .peek(s -> {
+                        s.setGroups(pupilGroupRepository.getAllByUniversityGroupIdIn(s.getGroupUniversityIds()));
+                        s.setProfessors(professorRepository.getAllByProfessorUniversityIdIn(s.getTeacherUniversityIds()));
+                    })
                     .collect(Collectors.toList());
+            List<Subject> subjectList = lessonsList.stream()
+                            .map(Subject::new)
+                            .collect(Collectors.toList());
+            SpbstuServiceApplication.logger.info("вот ответ уроков:" + lessonsList);
+            subjectRepository.saveAll(subjectList);
+            lessonsList = lessonsList.stream().peek(s -> s.setSubject(subjectRepository.findByName(s.getName()))).collect(Collectors.toList());
             lessonRepository.saveAll(lessonsList);
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         return body.getDays().get(0).getDate();
     }
