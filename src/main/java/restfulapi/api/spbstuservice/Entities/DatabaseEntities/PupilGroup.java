@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.context.annotation.Lazy;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Groups;
 
 import java.util.Set;
@@ -57,6 +58,7 @@ public class PupilGroup {
     }
 
     @Override
+    @Lazy
     public String toString() {
         return "PupilGroup{" +
                 "id='" + id + '\'' +

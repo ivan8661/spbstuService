@@ -1,5 +1,6 @@
 package restfulapi.api.spbstuservice;
 
+import io.netty.internal.tcnative.AsyncTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +13,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestTemplate;
 import restfulapi.api.spbstuservice.Services.importLessons.ImportService;
 
@@ -43,6 +46,6 @@ public class SpbstuServiceApplication {
                 logger.info("ЗАПУСК СИСТЕМЫ!");
                 importService.importTeachers();
                 importService.importGroups();
-    };
+            };
 }
 }

@@ -1,8 +1,12 @@
 package restfulapi.api.spbstuservice.Services.importLessons;
 
 
+import lombok.SneakyThrows;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.annotation.Transient;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import restfulapi.api.spbstuservice.Entities.DatabaseEntities.Lesson;
 import restfulapi.api.spbstuservice.Entities.DatabaseEntities.Professor;
@@ -22,7 +26,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class ImportService {
@@ -33,6 +40,10 @@ public class ImportService {
     private final PupilGroupRepository pupilGroupRepository;
     private final LessonRepository lessonRepository;
     private final SubjectRepository subjectRepository;
+
+    private final CopyOnWriteArrayList subjectList = new CopyOnWriteArrayList();
+    private final CopyOnWriteArrayList lessonList = new CopyOnWriteArrayList();
+    private final CopyOnWriteArrayList groupList = new CopyOnWriteArrayList();
 
     @Autowired
     public ImportService(ProfessorRepository professorRepository,
@@ -46,8 +57,9 @@ public class ImportService {
     }
 
 
+    @SneakyThrows
     public void importTeachers() {
-        Teachers teachers = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/teachers", Teachers.class);
+        Teachers teachers = getTeachersFromSPbstu();
         if (teachers == null || teachers.getTeachers() == null || teachers.getTeachers().isEmpty())
             return;
         List<Professor> professors = teachers
@@ -58,21 +70,27 @@ public class ImportService {
         professorRepository.saveAll(professors);
     }
 
-    public void importGroups() {
+
+    public void importGroups(){
         Faculties faculties = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/faculties", Faculties.class);
         if (faculties == null || faculties.getFaculties() == null || faculties.getFaculties().isEmpty())
             return;
         for (int facultyId : faculties.getFaculties().stream().map(Faculties.Faculty::getId).collect(Collectors.toList())) {
-            new Thread(() -> {
-                importThreadGroups(facultyId);
-            }).start();
+            Thread t = new Thread(() -> {
+                try {
+                    importThreadGroups(facultyId);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+            t.start();
         }
     }
 
 
-    private void importThreadGroups(int facultyId) {
-        Groups groups = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/faculties/"+ facultyId + "/groups", Groups.class);
-        if(groups == null || groups.getGroups().isEmpty())
+    private void importThreadGroups(int facultyId) throws InterruptedException {
+        Groups groups = getGroupsFromSpbstu(String.valueOf(facultyId));
+        if (groups == null || groups.getGroups().isEmpty())
             return;
         List<PupilGroup> pupilGroups = groups
                 .getGroups()
@@ -81,37 +99,44 @@ public class ImportService {
                 .collect(Collectors.toList());
         pupilGroupRepository.saveAll(pupilGroups);
         ArrayList<Integer> groupIdList = (ArrayList<Integer>) pupilGroups.stream().map(PupilGroup::getUniversityGroupId).collect(Collectors.toList());
-        SpbstuServiceApplication.logger.info("вот список групп" + groupIdList);
-        for(Integer groupId : groupIdList){
-            new Thread(() -> {
-                importThreadLessonFromGroup(groupId);
-            }).start();
+        for (Integer groupId :
+             groupIdList) {
+            Thread t = new Thread(() -> {
+                try {
+                    importThreadLessonFromGroups(groupId);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+            t.start();
         }
     }
 
-
-    private void importThreadLessonFromGroup(Integer groupId) {
-        Lessons lessonsBody = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/scheduler/"+ groupId, Lessons.class);
-        SpbstuServiceApplication.logger.info("вот ответ по группе: " + lessonsBody.getDays());
-        if(lessonsBody.getDays() == null || lessonsBody.getDays().isEmpty())
-            return;
-        SpbstuServiceApplication.logger.info("вот список: " + lessonsBody.getDays());
-        String nextWeek = importThreadLesson(lessonsBody, groupId);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[yyyy-MM-dd]");
-        LocalDate dt = LocalDate.parse(nextWeek, formatter);
-        dt = dt.plusDays(7);
-        SpbstuServiceApplication.logger.info("вот:" + dt);
-        lessonsBody = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/scheduler/"+
-                groupId +"?date="+dt, Lessons.class);
-        if(lessonsBody == null || lessonsBody.getDays().isEmpty())
-            return;
-        importThreadLesson(lessonsBody, groupId);
+    private void importThreadLessonFromGroups(Integer groupId) throws InterruptedException {
+        Lessons lessonsBody = getLessonsFromSpbstu(String.valueOf(groupId));
+        if ((lessonsBody != null ? lessonsBody.getDays() : null) == null || lessonsBody.getDays().isEmpty())
+                return;
+            String nextWeek = importThreadLesson(lessonsBody);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("[yyyy-MM-dd]");
+            LocalDate dt = LocalDate.parse(nextWeek, formatter);
+            dt = dt.plusDays(7);
+            lessonsBody = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/scheduler/" +
+                    groupId + "?date=" + dt, Lessons.class);
+            if (lessonsBody == null || lessonsBody.getDays().isEmpty())
+                return;
+            SpbstuServiceApplication.logger.info("чекает группу: " + groupId);
+        try {
+            Thread.sleep(75);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        importThreadLesson(lessonsBody);
     }
 
 
 
 
-    private String importThreadLesson(Lessons body, Integer groupId){
+    private String importThreadLesson(Lessons body){
         for(Day day : body.getDays()){
             String weekDay = getDayInText(day.getWeekday());
             boolean isOdd = body.getWeek().getIsOdd();
@@ -129,6 +154,10 @@ public class ImportService {
                         }
                     })
                     .peek(s -> {
+                        if(pupilGroupRepository.getAllByUniversityGroupIdIn(s.getGroupUniversityIds()).size()!=0)
+                            SpbstuServiceApplication.logger.info("нашлись группы!");
+                        if(professorRepository.getAllByProfessorUniversityIdIn(s.getTeacherUniversityIds()).size()!=0)
+                            SpbstuServiceApplication.logger.info("нашлись преподы!");
                         s.setGroups(pupilGroupRepository.getAllByUniversityGroupIdIn(s.getGroupUniversityIds()));
                         s.setProfessors(professorRepository.getAllByProfessorUniversityIdIn(s.getTeacherUniversityIds()));
                     })
@@ -136,20 +165,53 @@ public class ImportService {
             List<Subject> subjectList = lessonsList.stream()
                             .map(Subject::new)
                             .collect(Collectors.toList());
-            SpbstuServiceApplication.logger.info("вот ответ уроков:" + lessonsList);
             subjectRepository.saveAll(subjectList);
-            lessonsList = lessonsList.stream().peek(s -> s.setSubject(subjectRepository.findByName(s.getName()))).collect(Collectors.toList());
+            lessonsList = lessonsList.stream().peek(s -> {
+                if (!s.getName().isEmpty())
+                    s.setSubject(subjectRepository.findByName(s.getName()));
+            }).collect(Collectors.toList());
             lessonRepository.saveAll(lessonsList);
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
         return body.getDays().get(0).getDate();
     }
 
 
+
+    @SneakyThrows
+    private Teachers getTeachersFromSPbstu() {
+        Teachers teachers;
+        try {
+            teachers = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/teachers", Teachers.class);
+        } catch (RestClientException e) {
+            Thread.sleep(1500);
+            teachers = getTeachersFromSPbstu();
+        }
+        return teachers;
+    }
+
+    @SneakyThrows
+    private Lessons getLessonsFromSpbstu(String groupId) throws InterruptedException {
+        Lessons lessons;
+        try {
+            lessons = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/scheduler/" + groupId, Lessons.class);
+        } catch (Exception e) {
+            Thread.sleep(50);
+            lessons = getLessonsFromSpbstu(groupId);
+        }
+        return lessons;
+    }
+
+    @SneakyThrows
+    private Groups getGroupsFromSpbstu(String facultyId) throws InterruptedException {
+        Groups groups;
+        try {
+            groups = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/faculties/" + facultyId + "/groups", Groups.class);
+        } catch (Exception e) {
+            Thread.sleep(50);
+            groups = getGroupsFromSpbstu(facultyId);
+        }
+        return groups;
+    }
 
 
     private String getDayInText(Integer day){
