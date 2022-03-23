@@ -9,6 +9,7 @@ import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.Set;
 
@@ -30,6 +31,13 @@ public class Subject {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Set<Lesson> lessons;
 
+
+
     public Subject() {
+    }
+
+    public Subject(Lesson lesson) {
+        id = DigestUtils.sha256Hex("spbstu" + lesson.getName());
+        name = lesson.getName();
     }
 }
