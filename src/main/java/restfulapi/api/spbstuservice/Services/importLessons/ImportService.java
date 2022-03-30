@@ -2,9 +2,7 @@ package restfulapi.api.spbstuservice.Services.importLessons;
 
 
 import lombok.SneakyThrows;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.Transient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -16,7 +14,6 @@ import restfulapi.api.spbstuservice.Repositories.*;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Faculties;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Groups;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.Day;
-import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.LessonSpbstu;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.Lessons;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Teachers;
 import restfulapi.api.spbstuservice.SpbstuServiceApplication;
@@ -25,11 +22,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 public class ImportService {

@@ -72,6 +72,11 @@
             <version>2.13.1</version>
         </dependency>
         <dependency>
+            <groupId>com.github.ivan8661</groupId>
+            <artifactId>GetGraphQL</artifactId>
+            <version>dev-a7caaadf3a-1</version>
+        </dependency>
+        <dependency>
             <groupId>com.vaadin.external.google</groupId>
             <artifactId>android-json</artifactId>
             <version>0.0.20131108.vaadin1</version>
@@ -142,6 +147,10 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
         <repository>
             <id>spring-snapshots</id>
