@@ -11,6 +11,7 @@ public class AuthorizationService {
     public User regUser(String login, String password) throws Exception {
         SpbstuAuth sPbstuAuth = new SpbstuAuth();
         SpbstuAuth.Result result = sPbstuAuth.auth("EDU\\kovalev.ka", "maTo6Ge");
+
         return new User(result.name, result.secondName, result.avatar, result.id, result.cookie, result.group);
     }
 }
