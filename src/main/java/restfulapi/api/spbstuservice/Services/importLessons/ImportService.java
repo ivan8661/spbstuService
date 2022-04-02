@@ -33,10 +33,6 @@ public class ImportService {
     private final LessonRepository lessonRepository;
     private final SubjectRepository subjectRepository;
 
-    private final CopyOnWriteArrayList subjectList = new CopyOnWriteArrayList();
-    private final CopyOnWriteArrayList lessonList = new CopyOnWriteArrayList();
-    private final CopyOnWriteArrayList groupList = new CopyOnWriteArrayList();
-
     @Autowired
     public ImportService(ProfessorRepository professorRepository,
                          BuildingRepository buildingRepository,
