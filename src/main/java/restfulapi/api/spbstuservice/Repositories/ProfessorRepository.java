@@ -14,6 +14,7 @@ import java.util.Set;
 @Repository
 public interface ProfessorRepository extends CrudRepository<Professor, String> {
 
+
     Set<Professor> getAllByProfessorUniversityIdIn(List<Integer> id);
 
     Optional<Professor> findById(String id);

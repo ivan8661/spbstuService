@@ -1,7 +1,6 @@
 package restfulapi.api.spbstuservice.Controllers;
 
-import com.schedguap.schedguap.Exceptions.UserException;
-import com.schedguap.schedguap.Exceptions.UserExceptionType;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;

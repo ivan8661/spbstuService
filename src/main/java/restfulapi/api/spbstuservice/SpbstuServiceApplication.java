@@ -42,6 +42,7 @@ public class SpbstuServiceApplication {
     public CommandLineRunner commandLineRunner(@Autowired ImportService importService) {
             return (args) -> {
                 logger.info("ЗАПУСК СИСТЕМЫ!");
+                importService.importBuildings();
                 importService.importTeachers();
                 importService.importGroups();
             };

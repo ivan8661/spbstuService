@@ -6,11 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import restfulapi.api.spbstuservice.Entities.DatabaseEntities.Lesson;
-import restfulapi.api.spbstuservice.Entities.DatabaseEntities.Professor;
-import restfulapi.api.spbstuservice.Entities.DatabaseEntities.PupilGroup;
-import restfulapi.api.spbstuservice.Entities.DatabaseEntities.Subject;
+import restfulapi.api.spbstuservice.Entities.DatabaseEntities.*;
 import restfulapi.api.spbstuservice.Repositories.*;
+import restfulapi.api.spbstuservice.Services.importLessons.Entities.Buildings;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Faculties;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Groups;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.Day;
@@ -51,6 +49,18 @@ public class ImportService {
     }
 
 
+    public void importBuildings() {
+        Buildings buildingsSpbstu = getBuildingsFromSpbstu();
+        if(buildingsSpbstu==null || buildingsSpbstu.getBuildings()==null || buildingsSpbstu.getBuildings().isEmpty())
+            return;
+        List<Building> buildings = buildingsSpbstu
+                .getBuildings()
+                .stream()
+                .map(Building::new)
+                .collect(Collectors.toList());
+        buildingRepository.saveAll(buildings);
+
+    }
     @SneakyThrows
     public void importTeachers() {
         Teachers teachers = getTeachersFromSPbstu();
@@ -148,10 +158,6 @@ public class ImportService {
                         }
                     })
                     .peek(s -> {
-                        if(pupilGroupRepository.getAllByUniversityGroupIdIn(s.getGroupUniversityIds()).size()!=0)
-                            SpbstuServiceApplication.logger.info("нашлись группы!");
-                        if(professorRepository.getAllByProfessorUniversityIdIn(s.getTeacherUniversityIds()).size()!=0)
-                            SpbstuServiceApplication.logger.info("нашлись преподы!");
                         s.setGroups(pupilGroupRepository.getAllByUniversityGroupIdIn(s.getGroupUniversityIds()));
                         s.setProfessors(professorRepository.getAllByProfessorUniversityIdIn(s.getTeacherUniversityIds()));
                     })
@@ -161,8 +167,7 @@ public class ImportService {
                             .collect(Collectors.toList());
             subjectRepository.saveAll(subjectList);
             lessonsList = lessonsList.stream().peek(s -> {
-                if (!s.getName().isEmpty())
-                    s.setSubject(subjectRepository.findByName(s.getName()));
+                s.setSubject(subjectRepository.findByName(s.getName()));
             }).collect(Collectors.toList());
             lessonRepository.saveAll(lessonsList);
         }
@@ -170,6 +175,18 @@ public class ImportService {
     }
 
 
+
+    @SneakyThrows
+    private Buildings getBuildingsFromSpbstu() {
+        Buildings buildings;
+        try {
+            buildings = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/buildings", Buildings.class);
+        } catch (RestClientException e) {
+            Thread.sleep(1500);
+            buildings = getBuildingsFromSpbstu();
+        }
+        return buildings;
+    }
 
     @SneakyThrows
     private Teachers getTeachersFromSPbstu() {
