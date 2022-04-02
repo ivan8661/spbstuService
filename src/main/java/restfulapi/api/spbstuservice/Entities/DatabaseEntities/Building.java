@@ -8,6 +8,9 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.codec.digest.DigestUtils;
+import restfulapi.api.spbstuservice.Services.importLessons.Entities.Buildings;
+import restfulapi.api.spbstuservice.Services.importLessons.Entities.Teachers;
 
 
 @Setter
@@ -31,5 +34,11 @@ public class Building {
 
     public Building() {
 
+    }
+
+    public Building(Buildings.Building building) {
+        id = DigestUtils.sha256Hex("spbstu_building" + building.getId());
+        name = building.getName();
+        address = building.getAddress();
     }
 }

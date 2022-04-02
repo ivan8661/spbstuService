@@ -34,6 +34,6 @@ public class Professor {
     public Professor(Teachers.Teacher teacher) {
         id = DigestUtils.sha256Hex("spbstu_teacher" + teacher.getId());
         name = teacher.getFullName();
-        professorUniversityId = teacher.getOid();
+        professorUniversityId = teacher.getId();
     }
 }

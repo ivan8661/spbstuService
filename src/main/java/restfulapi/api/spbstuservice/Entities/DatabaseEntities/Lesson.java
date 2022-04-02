@@ -70,13 +70,15 @@ public class Lesson {
     }
 
     public Lesson(LessonSpbstu lessonSpbstu) {
-        id = DigestUtils.sha256Hex("spbstu_lesson" + lessonSpbstu.getTimeStart() + getAuditory(lessonSpbstu.getAuditories().get(0)) +
-                lessonSpbstu.getSubject() + getTeacher(lessonSpbstu.getTeachers()) + lessonSpbstu.getAuditories().get(0).getId() + lessonSpbstu.getTypeObj().getId());
+        id = DigestUtils.sha256Hex("spbstu_lesson" + lessonSpbstu.getTimeStart() + getAuditory(lessonSpbstu.getAuditories().get(0))
+                + getTeacher(lessonSpbstu.getTeachers()) + lessonSpbstu.getAuditories().get(0).getId() + lessonSpbstu.getTypeObj().getId() +
+                lessonSpbstu.getParity() + lessonSpbstu.getTimeEnd() + lessonSpbstu.getType() + lessonSpbstu.getAuditories()
+                );
         name = lessonSpbstu.getSubject();
         startTime = lessonSpbstu.getTimeStart();
         endTime = lessonSpbstu.getTimeEnd();
         lessonNum = createLessonNum(startTime);
-        rooms = setAdress(lessonSpbstu.getAuditories().get(0));
+        rooms = setAddress(lessonSpbstu.getAuditories().get(0));
         type = lessonSpbstu.getTypeObj().getName();
         groupUniversityIds.addAll(lessonSpbstu.getGroups().stream().map(Groups.Group::getId).collect(Collectors.toList()));
         subjectId = DigestUtils.sha256Hex("spbstu" + lessonSpbstu.getSubject());
@@ -129,7 +131,7 @@ public class Lesson {
         return " ";
     }
 
-    private String setAdress(Auditory auditory) {
+    private String setAddress(Auditory auditory) {
         String room = "";
         if(!auditory.getName().isEmpty()){
             room += "ауд. " + auditory.getName();
