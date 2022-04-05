@@ -12,7 +12,6 @@ import restfulapi.api.spbstuservice.Services.importLessons.Entities.Buildings;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Faculties;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Groups;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.Day;
-import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.LessonSpbstu;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.Lessons;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Teachers;
 import restfulapi.api.spbstuservice.SpbstuServiceApplication;
@@ -21,11 +20,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 public class ImportService {
