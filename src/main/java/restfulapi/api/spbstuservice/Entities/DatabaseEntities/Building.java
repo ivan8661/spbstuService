@@ -2,15 +2,13 @@ package restfulapi.api.spbstuservice.Entities.DatabaseEntities;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Buildings;
-import restfulapi.api.spbstuservice.Services.importLessons.Entities.Teachers;
+
+import javax.persistence.*;
 
 
 @Setter

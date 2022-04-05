@@ -16,7 +16,7 @@ services:
     depends_on:
       - redis
     ports:
-      - "8071:8071"
+      - "8073:8073"
   redis:
     image: "redis:alpine"
     command: redis-server --requirepass aw4cha3vaith

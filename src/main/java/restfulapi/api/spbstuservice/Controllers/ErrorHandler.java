@@ -18,8 +18,8 @@ public class ErrorHandler {
         return new ResponseEntity<>(ex, ex.getHttpStatus());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(NoHandlerFoundException.class)
-    protected ResponseEntity<UserException> handleFoundException(NoHandlerFoundException exception) {
+    @org.springframework.web.bind.annotation.ExceptionHandler(ClassNotFoundException.class)
+    protected ResponseEntity<UserException> handleFoundException(ServerErrorException exception) {
         UserException ex = new UserException(UserExceptionType.OBJECT_NOT_FOUND, exception);
         return handleUserException(ex);
     }

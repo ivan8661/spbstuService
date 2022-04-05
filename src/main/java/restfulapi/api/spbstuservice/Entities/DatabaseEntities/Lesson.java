@@ -2,7 +2,6 @@ package restfulapi.api.spbstuservice.Entities.DatabaseEntities;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +11,7 @@ import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.Audi
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.LessonSpbstu;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Teachers;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -57,10 +57,13 @@ public class Lesson {
 
 
     @Transient
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ArrayList<Integer> groupUniversityIds = new ArrayList<>();
     @Transient
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String subjectId;
     @Transient
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private ArrayList<Integer> teacherUniversityIds = new ArrayList<>();
 
 
