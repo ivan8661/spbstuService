@@ -13,6 +13,7 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import restfulapi.api.spbstuservice.Services.importLessons.ImportService;
 
 @SpringBootApplication
@@ -20,6 +21,7 @@ import restfulapi.api.spbstuservice.Services.importLessons.ImportService;
 @EnableJpaRepositories(basePackages = "restfulapi.api.spbstuservice")
 @Configuration
 @EnableEurekaClient
+@EnableScheduling
 public class SpbstuServiceApplication {
 
     public static Logger logger = LoggerFactory.getLogger(SpbstuServiceApplication.class);

@@ -3,6 +3,9 @@ package restfulapi.api.spbstuservice.Services.importLessons;
 
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -24,6 +27,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Service
+@Lazy(false)
 public class ImportService {
 
 
@@ -44,6 +48,12 @@ public class ImportService {
         this.subjectRepository = subjectRepository;
     }
 
+    @Scheduled(cron="0 05 4 * * *")
+    public void generalImportByCronTime() {
+        importBuildings();
+        importTeachers();
+        importGroups();
+    }
 
     public void importBuildings() {
         Buildings buildingsSpbstu = getBuildingsFromSpbstu();
