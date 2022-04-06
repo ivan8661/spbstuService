@@ -21,7 +21,7 @@ import java.util.LinkedList;
 public class UniversityInfoController {
 
 
-    private ScheduleUpdateRepository scheduleUpdateRepository;
+    private final ScheduleUpdateRepository scheduleUpdateRepository;
 
 
     @Autowired
@@ -33,17 +33,16 @@ public class UniversityInfoController {
     public ResponseEntity<String> universityInfo() throws JSONException, UserException {
 
         JSONObject universityInfo = new JSONObject();
-        ScheduleUpdate scheduleUpdate = scheduleUpdateRepository.findByName("GUAP");
+        ScheduleUpdate scheduleUpdate = scheduleUpdateRepository.findByName("SPBSTU");
         if(scheduleUpdate==null)
             throw new UserException(UserExceptionType.OBJECT_NOT_FOUND, null, null);
 
 
-        universityInfo.put("_id", "GUAP");
-        universityInfo.put("name", "ГУАП");
-        universityInfo.put("serviceName", "pro.guap");
+        universityInfo.put("_id", "SPBSTU");
+        universityInfo.put("name", "СПбПУ");
+        universityInfo.put("serviceName", null);
         universityInfo.put("referenceDate", scheduleUpdate.getSyncTime());
         universityInfo.put("referenceWeek", scheduleUpdate.getWeek());
-
         return ResponseEntity.ok().body(universityInfo.toString());
     }
 
@@ -53,8 +52,8 @@ public class UniversityInfoController {
         LinkedList<News> news = new LinkedList<>();
         news.add(new News("-61195360", "Санкт-Петербургский политехнический университет", true, false));
         news.add(new News("-170022924", "Типичный СПбПУ", true, true));
-        news.add(new News("-58950918", "Подслушано СПбПУ", true, false));
-        news.add(new News("-88039223", "Цитатки", true, true));
+        news.add(new News("-58950918", "Подслушано СПбПУ", true, true));
+        news.add(new News("-88039223", "Цитатки", true, false));
 
         return ResponseEntity.ok().body(news);
     }
