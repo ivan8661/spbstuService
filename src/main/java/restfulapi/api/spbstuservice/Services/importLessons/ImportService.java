@@ -2,7 +2,11 @@ package restfulapi.api.spbstuservice.Services.importLessons;
 
 
 import lombok.SneakyThrows;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -20,10 +24,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Service
+@Lazy(false)
 public class ImportService {
 
 
@@ -32,18 +36,30 @@ public class ImportService {
     private final PupilGroupRepository pupilGroupRepository;
     private final LessonRepository lessonRepository;
     private final SubjectRepository subjectRepository;
+    private final UpdateInfoRepository updateInfoRepository;
 
     @Autowired
     public ImportService(ProfessorRepository professorRepository,
                          BuildingRepository buildingRepository,
-                         PupilGroupRepository pupilGroupRepository, LessonRepository lessonRepository, SubjectRepository subjectRepository) {
+                         PupilGroupRepository pupilGroupRepository,
+                         LessonRepository lessonRepository,
+                         SubjectRepository subjectRepository,
+                         UpdateInfoRepository updateInfoRepository) {
         this.professorRepository = professorRepository;
         this.buildingRepository = buildingRepository;
         this.pupilGroupRepository = pupilGroupRepository;
         this.lessonRepository = lessonRepository;
         this.subjectRepository = subjectRepository;
+        this.updateInfoRepository = updateInfoRepository;
     }
 
+    @Scheduled(cron="0 29 21 * * *")
+    public void generalImportByCronTime() throws JSONException {
+        importBuildings();
+        importTeachers();
+        importGroups();
+        updateInfoRepository.save(new UpdateInfo("SPBSTU", System.currentTimeMillis(), getCurrentWeek()));
+    }
 
     public void importBuildings() {
         Buildings buildingsSpbstu = getBuildingsFromSpbstu();
@@ -55,8 +71,8 @@ public class ImportService {
                 .map(Building::new)
                 .collect(Collectors.toList());
         buildingRepository.saveAll(buildings);
-
     }
+
     @SneakyThrows
     public void importTeachers() {
         Teachers teachers = getTeachersFromSPbstu();
@@ -232,5 +248,19 @@ public class ImportService {
             case 7 -> "sun";
             default -> "NAN";
         };
+    }
+
+    private String getCurrentWeek() throws JSONException {
+        String weekTime = new RestTemplate().getForObject("https://ruz.spbstu.ru/api/v1/ruz/scheduler/34470", String.class);
+        JSONObject week;
+        if (weekTime == null)
+            return "";
+        SpbstuServiceApplication.logger.info(weekTime);
+        week = new JSONObject(weekTime);
+        if (week.optBoolean("is_odd")) {
+            return "odd";
+        } else {
+            return "even";
+        }
     }
 }
