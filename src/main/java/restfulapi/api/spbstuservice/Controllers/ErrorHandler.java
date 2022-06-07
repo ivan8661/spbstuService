@@ -1,7 +1,6 @@
 package restfulapi.api.spbstuservice.Controllers;
 
-import com.schedguap.schedguap.Exceptions.UserException;
-import com.schedguap.schedguap.Exceptions.UserExceptionType;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
@@ -19,8 +18,8 @@ public class ErrorHandler {
         return new ResponseEntity<>(ex, ex.getHttpStatus());
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(NoHandlerFoundException.class)
-    protected ResponseEntity<UserException> handleFoundException(NoHandlerFoundException exception) {
+    @org.springframework.web.bind.annotation.ExceptionHandler(ClassNotFoundException.class)
+    protected ResponseEntity<UserException> handleFoundException(ServerErrorException exception) {
         UserException ex = new UserException(UserExceptionType.OBJECT_NOT_FOUND, exception);
         return handleUserException(ex);
     }

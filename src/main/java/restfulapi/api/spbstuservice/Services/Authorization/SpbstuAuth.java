@@ -7,7 +7,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -70,7 +69,7 @@ class SpbstuAuth {
 
         var json = new JSONObject(jsonString).getJSONObject("user").getJSONObject("wsAsu");
         return new Result(
-                json.getString("user_id"),
+                json.getString("user_id")+"sbstu",
                 json.getString("first_name"),
                 json.getString("last_name"),
                 json.getJSONArray("structure").getJSONObject(0).getString("sub_dep"),

@@ -1,11 +1,9 @@
 package restfulapi.api.spbstuservice.Controllers;
 
+import org.json.JSONObject;
 import restfulapi.api.spbstuservice.Entities.User;
-import restfulapi.api.spbstuservice.Exceptions.UserException;
 import restfulapi.api.spbstuservice.Services.Authorization.AuthorizationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.PostMapping;

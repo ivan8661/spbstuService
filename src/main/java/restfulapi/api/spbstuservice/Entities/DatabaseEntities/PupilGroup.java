@@ -2,17 +2,13 @@ package restfulapi.api.spbstuservice.Entities.DatabaseEntities;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.context.annotation.Lazy;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Groups;
-
+import javax.persistence.*;
 import java.util.Set;
 
 @Getter

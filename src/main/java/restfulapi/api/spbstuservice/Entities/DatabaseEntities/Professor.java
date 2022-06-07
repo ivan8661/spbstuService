@@ -1,14 +1,14 @@
 package restfulapi.api.spbstuservice.Entities.DatabaseEntities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Teachers;
+
+import java.util.Set;
 
 @Getter
 @Setter
@@ -27,6 +27,10 @@ public class Professor {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Integer professorUniversityId;
 
+    @ManyToMany
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Set<Lesson> lessons;
+
 
     public Professor() {
     }
@@ -34,6 +38,6 @@ public class Professor {
     public Professor(Teachers.Teacher teacher) {
         id = DigestUtils.sha256Hex("spbstu_teacher" + teacher.getId());
         name = teacher.getFullName();
-        professorUniversityId = teacher.getOid();
+        professorUniversityId = teacher.getId();
     }
 }
