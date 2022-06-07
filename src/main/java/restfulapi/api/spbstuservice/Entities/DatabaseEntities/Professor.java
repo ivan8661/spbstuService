@@ -8,6 +8,8 @@ import lombok.Setter;
 import org.apache.commons.codec.digest.DigestUtils;
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Teachers;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,6 +26,10 @@ public class Professor {
     @Column
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Integer professorUniversityId;
+
+    @ManyToMany
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Set<Lesson> lessons;
 
 
     public Professor() {

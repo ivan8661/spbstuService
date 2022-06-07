@@ -69,7 +69,7 @@ class SpbstuAuth {
 
         var json = new JSONObject(jsonString).getJSONObject("user").getJSONObject("wsAsu");
         return new Result(
-                json.getString("user_id"),
+                json.getString("user_id")+"sbstu",
                 json.getString("first_name"),
                 json.getString("last_name"),
                 json.getJSONArray("structure").getJSONObject(0).getString("sub_dep"),

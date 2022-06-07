@@ -15,6 +15,7 @@ import restfulapi.api.spbstuservice.Exceptions.UserExceptionType;
 import restfulapi.api.spbstuservice.Repositories.ScheduleUpdateRepository;
 
 import java.util.LinkedList;
+import java.util.Optional;
 
 @RestController
 @ControllerAdvice
@@ -40,7 +41,7 @@ public class UniversityInfoController {
 
         universityInfo.put("_id", "SPBSTU");
         universityInfo.put("name", "СПбПУ");
-        universityInfo.put("serviceName", null);
+        universityInfo.put("serviceName", Optional.empty());
         universityInfo.put("referenceDate", scheduleUpdate.getSyncTime());
         universityInfo.put("referenceWeek", scheduleUpdate.getWeek());
         return ResponseEntity.ok().body(universityInfo.toString());

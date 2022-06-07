@@ -83,11 +83,9 @@ public class Lesson {
         lessonNum = createLessonNum(startTime);
         rooms = setAddress(lessonSpbstu.getAuditories().get(0));
         type = lessonSpbstu.getTypeObj().getName();
-        groupUniversityIds.addAll(lessonSpbstu.getGroups().stream().map(Groups.Group::getId).collect(Collectors.toList()));
+        groupUniversityIds.addAll(lessonSpbstu.getGroups().stream().map(Groups.Group::getId).toList());
         subjectId = DigestUtils.sha256Hex("spbstu" + lessonSpbstu.getSubject());
-        if(lessonSpbstu.getTeachers() != null) {
-            teacherUniversityIds.addAll(lessonSpbstu.getTeachers().stream().map(Teachers.Teacher::getId).collect(Collectors.toList()));
-        }
+        teacherUniversityIds.addAll(lessonSpbstu.getTeachers().stream().map(Teachers.Teacher::getId).toList());
     }
 
     private String createLessonNum(String startTime){

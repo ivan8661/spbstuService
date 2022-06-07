@@ -20,6 +20,7 @@ import restfulapi.api.spbstuservice.Services.importLessons.Entities.Lessons.Less
 import restfulapi.api.spbstuservice.Services.importLessons.Entities.Teachers;
 import restfulapi.api.spbstuservice.SpbstuServiceApplication;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class ImportService {
         this.updateInfoRepository = updateInfoRepository;
     }
 
-    @Scheduled(cron="0 29 21 * * *")
+    @Scheduled(cron="0 05 04 * * *")
     public void generalImportByCronTime() throws JSONException {
         importBuildings();
         importTeachers();
