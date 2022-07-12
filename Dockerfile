@@ -6,5 +6,6 @@ RUN mvn clean -X -Dmaven.test.skip
 
 FROM openjdk:18.0.1.1-jdk-oraclelinux7
 COPY --from=build /spbstuService /spbstuService
+RUN ECHO "$pwd"  
 RUN java -jar /spbstuService/target/spbstu.jar
 EXPOSE 8080
