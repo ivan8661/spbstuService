@@ -1,6 +1,6 @@
 FROM maven:3.8.6-openjdk-18 as build
 WORKDIR /spbstuService
-COPY spbstuService/* /spbstuService/
+COPY * /spbstuService/
 
 RUN mvn clean -X -DoutputDirectory=/spbstuService/output -Dmaven.test.skip
 
