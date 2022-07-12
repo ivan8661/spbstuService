@@ -5,6 +5,6 @@ COPY * /spbstuService/
 RUN mvn clean -X -DoutputDirectory=/spbstuService/output -Dmaven.test.skip
 
 FROM openjdk:18.0.1.1-jdk-oraclelinux7
-COPY --from=build /spbstuService/output /spbstuService
+COPY --from=build /spbstuService/target /spbstuService
 RUN java -jar /spbstuService/spbstu.jar
 EXPOSE 8080
