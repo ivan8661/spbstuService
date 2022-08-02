@@ -6,4 +6,6 @@ import restfulapi.api.spbstuservice.Entities.DatabaseEntities.UpdateInfo;
 
 @Repository
 public interface UpdateInfoRepository extends CrudRepository<UpdateInfo, String> {
+    @Override
+    void deleteAll();
 }

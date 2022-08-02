@@ -7,4 +7,6 @@ import restfulapi.api.spbstuservice.Entities.DatabaseEntities.Building;
 
 @Repository
 public interface BuildingRepository extends CrudRepository<Building, String> {
+    @Override
+    void deleteAll();
 }

@@ -54,12 +54,22 @@ public class ImportService {
         this.updateInfoRepository = updateInfoRepository;
     }
 
-    @Scheduled(cron="0 05 04 * * *")
+    @Scheduled(cron="0 00 04 * * *")
     public void generalImportByCronTime() throws JSONException {
+        cleanAllDataFromDB();
         importBuildings();
         importTeachers();
         importGroups();
         updateInfoRepository.save(new UpdateInfo("SPBSTU", System.currentTimeMillis(), getCurrentWeek()));
+    }
+
+    public void cleanAllDataFromDB() {
+        buildingRepository.deleteAll();
+        lessonRepository.deleteAll();
+        professorRepository.deleteAll();
+        pupilGroupRepository.deleteAll();
+        subjectRepository.deleteAll();
+        updateInfoRepository.deleteAll();
     }
 
     public void importBuildings() {

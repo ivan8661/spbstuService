@@ -14,6 +14,9 @@ public interface LessonRepository extends CrudRepository<Lesson, String> {
 
     List<Lesson> getAllBy();
 
+    @Override
+    void deleteAll();
+
     List<Lesson> getAllByGroups(PupilGroup pupilGroup);
 
     List<Lesson> getAllByProfessors(Professor professor);
