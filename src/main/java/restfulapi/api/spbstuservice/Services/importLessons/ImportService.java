@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import restfulapi.api.spbstuservice.Entities.DatabaseEntities.*;
@@ -55,6 +56,7 @@ public class ImportService {
     }
 
     @Scheduled(cron="0 00 04 * * *")
+    @Transactional
     public void generalImportByCronTime() throws JSONException {
         cleanAllDataFromDB();
         importBuildings();
@@ -131,11 +133,13 @@ public class ImportService {
             Thread t = new Thread(() -> {
                 try {
                     importThreadLessonFromGroups(groupId);
+                    System.out.println("импортируют группу:" + groupId);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             });
             t.start();
+            Thread.sleep(2000);
         }
     }
 
@@ -153,7 +157,7 @@ public class ImportService {
                 return;
             SpbstuServiceApplication.logger.info("чекает группу: " + groupId);
         try {
-            Thread.sleep(75);
+            Thread.sleep(90);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -180,10 +184,6 @@ public class ImportService {
                             s.setId(s.getId()+"e"); //even
                         }
                     })
-                    .peek(s -> {
-                        s.setGroups(pupilGroupRepository.getAllByUniversityGroupIdIn(s.getGroupUniversityIds()));
-                        s.setProfessors(professorRepository.getAllByProfessorUniversityIdIn(s.getTeacherUniversityIds()));
-                    })
                     .collect(Collectors.toList());
             List<Subject> subjectList = lessonsList.stream()
                             .map(Subject::new)
@@ -191,6 +191,8 @@ public class ImportService {
             subjectRepository.saveAll(subjectList);
             lessonsList = lessonsList.stream().peek(s -> {
                 s.setSubject(subjectRepository.findByName(s.getName()));
+                s.setGroups(pupilGroupRepository.getAllByUniversityGroupIdIn(s.getGroupUniversityIds()));
+                s.setProfessors(professorRepository.getAllByProfessorUniversityIdIn(s.getTeacherUniversityIds()));
             }).collect(Collectors.toList());
             lessonRepository.saveAll(lessonsList);
         }

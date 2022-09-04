@@ -85,8 +85,11 @@ public class Lesson {
         type = lessonSpbstu.getTypeObj().getName();
         groupUniversityIds.addAll(lessonSpbstu.getGroups().stream().map(Groups.Group::getId).toList());
         subjectId = DigestUtils.sha256Hex("spbstu" + lessonSpbstu.getSubject());
-        teacherUniversityIds.addAll(lessonSpbstu.getTeachers().stream().map(Teachers.Teacher::getId).toList());
-    }
+        if(lessonSpbstu.getTeachers() != null) {
+            System.out.println(lessonSpbstu.getTeachers().get(0).getFullName());
+            teacherUniversityIds.addAll(lessonSpbstu.getTeachers().stream().map(Teachers.Teacher::getId).toList());
+        }
+        }
 
     private String createLessonNum(String startTime){
         switch (startTime) {
