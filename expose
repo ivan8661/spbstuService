@@ -1,0 +1,15 @@
+#!/bin/bash
+export PATH="${PWD}/:$PATH"
+
+result=$(echo "$@" | sed "s/share localhost/share host.docker.internal/")
+
+if [ "$result" != "" ];then
+   docker run \
+	--rm \
+	-it \
+	-p 4040:4040 \
+	-v "${PWD}/.expose:/root/.expose" \
+	docker.kidev.ru/expose $result
+else
+	docker run --rm docker.kidev.ru/expose list
+fi

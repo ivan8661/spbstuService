@@ -1,0 +1,11 @@
+version: '3'
+services:
+  default:
+    image: docker.kidev.ru/test
+    build:
+      context: .
+    restart: always
+    labels:
+    - "traefik.enable=true"
+    - "traefik.http.routers.tracks.tls.certresolver=default"
+    - "traefik.http.services.tracks.loadbalancer.server.port=8080"

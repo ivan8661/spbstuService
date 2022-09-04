@@ -60,7 +60,7 @@ class SpbstuAuth {
     public Result fetchUser(String cookie) throws Exception {
         var body = fetchUserBody(cookie);
         var result = parseUser(body);
-        result.setCookie(cookie);
+        result.setCookie(cookie.substring(0, cookie.indexOf(';')));
         return result;
     }
 

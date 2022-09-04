@@ -32,10 +32,8 @@ public class SpbstuServiceApplication {
     @Bean
     public CommandLineRunner commandLineRunner(@Autowired ImportService importService) {
             return (args) -> {
+                importService.generalImportByCronTime();
                 logger.info("ЗАПУСК СИСТЕМЫ!");
-                /* importService.importBuildings();
-                importService.importTeachers();
-                importService.importGroups(); */
             };
 }
 
