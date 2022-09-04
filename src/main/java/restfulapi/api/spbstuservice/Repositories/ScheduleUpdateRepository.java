@@ -7,6 +7,8 @@ import restfulapi.api.spbstuservice.Entities.DatabaseEntities.ScheduleUpdate;
 @Repository
 public interface ScheduleUpdateRepository extends CrudRepository<ScheduleUpdate, String> {
 
+    @Override
+    void deleteAll();
 
     public ScheduleUpdate findByName(String name);
 

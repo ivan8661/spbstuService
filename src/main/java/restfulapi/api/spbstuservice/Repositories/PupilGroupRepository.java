@@ -16,6 +16,10 @@ public interface PupilGroupRepository extends CrudRepository<PupilGroup, String>
 
     List<PupilGroup> getAllBy();
 
+
+    @Override
+    void deleteAll();
+
     Set<PupilGroup> getAllByUniversityGroupIdIn(List<Integer> id);
 
     Optional<PupilGroup> getById(String id);

@@ -11,6 +11,8 @@ import java.util.Set;
 @Repository
 public interface SubjectRepository extends CrudRepository<Subject, String> {
 
+    @Override
+    void deleteAll();
 
     Subject findByName(String name);
 

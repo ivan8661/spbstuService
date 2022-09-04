@@ -17,6 +17,10 @@ public interface ProfessorRepository extends CrudRepository<Professor, String> {
 
     Set<Professor> getAllByProfessorUniversityIdIn(List<Integer> id);
 
+
+    @Override
+    void deleteAll();
+
     Optional<Professor> findById(String id);
 
     List<Professor> getAllBy();

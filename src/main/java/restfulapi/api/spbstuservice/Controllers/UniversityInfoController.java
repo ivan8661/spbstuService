@@ -13,6 +13,7 @@ import restfulapi.api.spbstuservice.Entities.News;
 import restfulapi.api.spbstuservice.Exceptions.UserException;
 import restfulapi.api.spbstuservice.Exceptions.UserExceptionType;
 import restfulapi.api.spbstuservice.Repositories.ScheduleUpdateRepository;
+import restfulapi.api.spbstuservice.Services.importLessons.ImportService;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -24,10 +25,14 @@ public class UniversityInfoController {
 
     private final ScheduleUpdateRepository scheduleUpdateRepository;
 
+    private final ImportService importService;
+
 
     @Autowired
-    public UniversityInfoController(ScheduleUpdateRepository scheduleUpdateRepository) {
+    public UniversityInfoController(ScheduleUpdateRepository scheduleUpdateRepository,
+                                    ImportService importService) {
             this.scheduleUpdateRepository = scheduleUpdateRepository;
+            this.importService = importService;
     }
 
     @GetMapping("/universityInfo")
@@ -35,15 +40,19 @@ public class UniversityInfoController {
 
         JSONObject universityInfo = new JSONObject();
         ScheduleUpdate scheduleUpdate = scheduleUpdateRepository.findByName("SPBSTU");
-        if(scheduleUpdate==null)
-            throw new UserException(UserExceptionType.OBJECT_NOT_FOUND, null, null);
 
 
         universityInfo.put("_id", "SPBSTU");
         universityInfo.put("name", "СПбПУ");
-        universityInfo.put("serviceName", Optional.empty());
-        universityInfo.put("referenceDate", scheduleUpdate.getSyncTime());
-        universityInfo.put("referenceWeek", scheduleUpdate.getWeek());
+        universityInfo.put("serviceName", "lk.spbstu");
+        if(scheduleUpdate==null) {
+            universityInfo.put("referenceDate", System.currentTimeMillis()/1000);
+            universityInfo.put("referenceWeek", "odd");
+            new Thread(importService::generalImportByCronTime);
+        } else {
+            universityInfo.put("referenceDate", scheduleUpdate.getSyncTime());
+            universityInfo.put("referenceWeek", scheduleUpdate.getWeek());
+        }
         return ResponseEntity.ok().body(universityInfo.toString());
     }
 
