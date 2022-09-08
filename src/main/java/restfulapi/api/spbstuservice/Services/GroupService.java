@@ -24,11 +24,13 @@ public class GroupService {
 
 
     public ListAnswer<PupilGroup> getGroups(Map<String, String> params) throws NoSuchFieldException {
-
+        System.out.println("параметры:" + params);
+        if(params.get("q").equals("")) {
+            params.remove("q");
+        }
         QueryParametersBuilder<PupilGroup> queryBuilder = new QueryParametersBuilder<>(params, PupilGroup.class);
         Specification<PupilGroup> spc = queryBuilder.getSpecification(null);
         Pageable pageable = queryBuilder.getPage();
-
         Page<PupilGroup> page = pupilGroupRepository.findAll(spc, pageable);
         return new ListAnswer<>(page);
     }

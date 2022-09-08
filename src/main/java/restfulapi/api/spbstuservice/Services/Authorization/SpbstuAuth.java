@@ -42,7 +42,7 @@ class SpbstuAuth {
             this.id = id;
             this.name = name;
             this.secondName = secondName;
-            this.group = group;
+            this.group = group.replace("/", " ");
             this.avatar = avatar;
         }
     }

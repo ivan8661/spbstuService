@@ -49,7 +49,12 @@ public class PupilGroup {
 
     public PupilGroup(Groups.Group group) {
         id = DigestUtils.sha256Hex("spbstu_group" + group.getId());
-        name = group.getName();
+        level = String.valueOf(group.getLevel());
+        type = group.getType();
+        kind = String.valueOf(group.getKind());
+        spec = group.getSpec();
+        year = String.valueOf(group.getYear());
+        name = group.getName().replace("/", " ");
         universityGroupId = group.getId();
     }
 
